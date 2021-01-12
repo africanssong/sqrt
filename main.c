@@ -1,7 +1,14 @@
- /**********************
+/*
+    Classic McEliece Parameters: (m, t)
+    1. (12, 64)
+    2. (13, 96)
+    3. (13, 128)
+    4. (13, 119)
+    5. (13, 128)
+*/
+
+/**********************
  * 사용해야하는 파라미터 
- * m  12  13  13    13    13
- * t  64  96  128   119   128 
  ***********************/
 
 #include <time.h>
@@ -16,15 +23,16 @@
 #include "fmpz.h"
 
 #define UPBOUND 10000  // 2^m -1 개의 테이블 생성 
-#define FALSE 0    // 두 값을 비교하는 과정에서 false인 경우 0을 출력함.  
+#define FALSE 0    // 두 값을 비교하는 과정에서 false인 경우 0을 출력함.
 
-int main()
+    int
+    main()
 {
-    double cloal=0, cloex=0;
+    double t_precomp=0, t_modexp=0;
     
-    int cou=1000;
+    int n_iter=10;
 
-    for(int count=0;count<cou;count++){
+    for(int cnt=0;cnt<n_iter;cnt++){
 
     fmpz_t q, twom, twom_1, twomt_1, two;
     slong  m, z, t;
@@ -184,7 +192,7 @@ int main()
         //printf("return(x) = "); fq_nmod_poly_print_pretty(result, "X", ctx);  printf("\n");   // ri 
     }
     c1 = clock();                           // time end
-    cloal += (double) (c1 - c0) / CLOCKS_PER_SEC;
+    t_precomp += (double) (c1 - c0) / CLOCKS_PER_SEC;
 
     nmod_poly_clear(np2);
     fq_nmod_poly_clear(qev, ctx);     // 변수 초기화
@@ -218,7 +226,7 @@ int main()
     else
         printf("\n TRUE Q(x) == return^2 \n");
     
-    //printf("time algori : %fs\n", cloal);     // 알고리즘 계산시간
+    //printf("time algori : %fs\n", t_precomp);     // 알고리즘 계산시간
 
     //================== 지수승 연산 ================================
     // fqm[X]/g(X)의 원소 f(X)에 대해 f(X)^(2^(mt-1)) mod g(X)는 sqrt(f(X))가 됨을 이용.
@@ -232,7 +240,7 @@ int main()
     c1 = clock();                       // time end
     
     
-    cloex += (double) (c1 - c0) / CLOCKS_PER_SEC;
+    t_modexp += (double) (c1 - c0) / CLOCKS_PER_SEC;
 
     b = fq_nmod_poly_equal(result,expone,ctx);          // 위의 알고리듬과 같은 결과가 나오는지 확인. 
     
@@ -244,7 +252,7 @@ int main()
     else
         printf(" TRUE sqrt(Q(x)) == return \n");   
 
-    //printf("time expone : %fs\n", cloex); // 지수승 계산시간
+    //printf("time expone : %fs\n", t_modexp); // 지수승 계산시간
     //printf("\n\n");
     
     //====================== 메모리 해제 ============================
@@ -271,13 +279,13 @@ int main()
     fq_nmod_poly_clear(expone,ctx);
 
     fq_nmod_ctx_clear(ctx);
-    printf("%d\n",count);
+    printf("%d\n",cnt);
     
     }
 
     printf("\n");
-    printf("time algori : %fs\n", cloal/cou);     // 알고리즘 계산시간
-    printf("time expone : %fs\n", cloex/cou);     // 지수승 계산시간
+    printf("time algori : %fs\n", t_precomp/n_iter);     // 알고리즘 계산시간
+    printf("time expone : %fs\n", t_modexp/n_iter);     // 지수승 계산시간
 
 
     return EXIT_SUCCESS;
